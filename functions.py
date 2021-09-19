@@ -1,8 +1,9 @@
-import os
+import numpy as np, os
 from inspect import signature
 from PIL import Image
 # from ISR.models import RDN, RRDN
 from pprint import pprint
+from numpy import mod
 from termcolor import colored, cprint
 from typing import Iterable, Tuple, Union
 
@@ -33,13 +34,13 @@ from imageai.Detection import ObjectDetection
     # isr_img = model_used.predict(img_used)
     # return isr_img
     
-def classify_image(img_path: str, model: str = 'MobileNetV2', n_predictions: int = 1):
+def classify_image(img: Union[str, np.ndarray], model: str = 'MobileNetV2', n_predictions: int = 1):
     """
     Classifies image with specified DL model and number of predicted labels.
 
     Parameters:
-        img_path (str) - Path to image file.
-        model (str) - Name of model for classification. Defaults to 'resnet50_imagenet_tf.2.0.h5'.
+        img (Union[str, np.ndarray]) - Image either as a path or numpy array of image.
+        model (str) - Name of model for classification. Defaults to 'MobileNetV2'.
         n_predictions (int) - Number of predictions to make, ranked from most probable to least probable. Defaults to 1.
     
     Returns:
@@ -64,21 +65,26 @@ def classify_image(img_path: str, model: str = 'MobileNetV2', n_predictions: int
         raise ValueError(colored(text=f'Invalid model name ({model}).', color='yellow'))
 
     clf.loadModel()
-    predictions, probabilities = clf.classifyImage(image_input=img_path, result_count=n_predictions, input_type='file')
+
+    predictions = None
+    probabilities = None
+    if type(img) == str:
+        predictions, probabilities = clf.classifyImage(image_input=img, result_count=n_predictions, input_type='file')
+    else:
+        predictions, probabilities = clf.classifyImage(image_input=img, result_count=n_predictions, input_type='array')
     return predictions, probabilities
 
-def detect_objects_from_image(img_path: str, model: str = 'RetinaNet'):
+def detect_objects_from_image(img: Union[str, np.ndarray], model: str = 'RetinaNet'):
     """
     Classifies image with specified DL model and number of predicted labels.
 
     Parameters:
-        img_path (str) - Path to image file.
+        img (Union[str, np.ndarray]) - Image either as a path or numpy array of image.
         model (str) - Name of model for classification. Defaults to 'resnet50_imagenet_tf.2.0.h5'.
-    
+
     Returns:
         Tuple[Iterable, Iterable] - Predicted labels and probabilities ranked descendingly.
     """
-    
     detector = ObjectDetection()
 
     if model == 'RetinaNet':
@@ -94,18 +100,28 @@ def detect_objects_from_image(img_path: str, model: str = 'RetinaNet'):
         raise ValueError(colored(text=f'Invalid model name ({model}).', color='yellow'))
 
     detector.loadModel()
-    detections = detector.detectObjectsFromImage(
-        input_image=img_path,
-        output_image_path=os.path.join('detections/', img_path.split(sep='/')[-1]),
-        minimum_percentage_probability=30,
-        output_type='file',
-        extract_detected_objects=True
-    )
-    pprint(type(detections))
+
+    detections = None
+    if type(img) == str:
+        detections = detector.detectObjectsFromImage(
+            input_image=img,
+            input_type='file',
+            output_image_path=os.path.join('detections/', img.split(sep='/')[-1]),
+            minimum_percentage_probability=30,
+            output_type='file',
+            extract_detected_objects=True
+        )
+    else:
+        detections = detector.detectObjectsFromImage(
+            input_image=img,
+            input_type='array',
+            output_image_path=os.path.join('detections/', 'object_detection.png'),
+            minimum_percentage_probability=30,
+            output_type='file',
+            extract_detected_objects=True
+        )
+
     return detections
 
 if __name__ == '__main__':
-    # pprint(classify_image(img_path='./images/english_village.png', model='MobileNetV2'))
-    # pprint(classify_image(img_path='./images/english_village.png', model='DenseNet121'))
-    pprint(detect_objects_from_image(img_path='images/english_village.png'))
-
+    pass
