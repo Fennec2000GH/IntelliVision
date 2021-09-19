@@ -1,0 +1,7 @@
+imageai
+h5py
+numpy
+pandas
+pillow
+tensorflow
+termcolor
