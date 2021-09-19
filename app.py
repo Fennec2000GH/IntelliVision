@@ -5,15 +5,32 @@ from termcolor import colored, cprint
 
 from functions import *
 
+# Aesthetics
+st.set_page_config(
+    page_title='IntelliVision',
+    page_icon='🔎',
+    layout='centered',
+    initial_sidebar_state='expanded'
+)
+
+st.image(image='./logo.gif')
 st.title(body='IntelliVision')
 
-# Classify Image
-st.markdown(body='## Classify Image')
+col1, col2, col3 = st.columns(spec=3)
+
+badges = list(['![language](https://img.shields.io/badge/language-python-yellow?style=plastic&logo=appveyor)',
+'![ML/AI](https://img.shields.io/badge/ML/AI-ImageAI-darkblue)',
+'[![Star](https://img.shields.io/github/stars/Fennec2000GH/IntelliVision.svg?logo=github&style=social)](https://gitHub.com/Fennec2000GH/IntelliVision)'])
+
+st.write((' ' * 5).join(badges))
 
 img_upload = st.file_uploader(
     label='Upload Image',
     type=list(['jpg', 'png'])
 )
+
+# Classify Image
+st.markdown(body='## Classify Image')
 
 clf_model = st.selectbox(
     label='Select Model',
